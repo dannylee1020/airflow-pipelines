@@ -17,7 +17,7 @@ dag = DAG(
     dag_id = 'la_traffic_data',
     default_args = dag_args,
     end_date = datetime(2017,6,1),
-    schedule_interval = ('0 9 * * *')
+    schedule_interval = '@daily'
 )
 
 get_data = PythonOperator(
