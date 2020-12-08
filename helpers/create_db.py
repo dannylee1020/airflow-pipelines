@@ -19,7 +19,7 @@ def create_db():
 
     create_table = ''' 
     DROP TABLE IF EXISTS %s ;
-    CREATE UNLOGGED TABLE IF NOT EXISTS %s
+    CREATE TABLE IF NOT EXISTS %s
         (
             location              TEXT,
             count_date            DATE,

@@ -53,7 +53,6 @@ def insert_data(**context):
 
 
 
-
 # # storing data from api instead of fetching from xcom
 # def request_data(end_point, **kwargs):
 #     session = requests.Session()
