@@ -4,8 +4,8 @@ from airflow.operators.python_operator import PythonOperator
 from airflow.contrib.sensors.python_sensor import PythonSensor
 import psycopg2
 
-from helpers.get_traffic_data import insert_data, request_data
-from helpers.get_location import get_location
+from helpers.scripts.get_traffic_data import insert_data, request_data
+from helpers.scripts.get_location import get_location
 
 
 dag_args = {
