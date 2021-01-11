@@ -5,27 +5,22 @@ from airflow.contrib.operators.bigquery_operator import BigQueryOperator
 from airflow.contrib.operators.bigquery_check_operator import BigQueryCheckOperator
 from airflow.contrib.operators.bigquery_to_gcs import BigQueryToCloudStorageOperator
 
-project_id = 'airflow-sandbox-296122'
-dataset_id = 'airflow'
-tags_data_table_id = 'stack_overflow_tags_'
-cloud_storage_uri = 'gs://airflow_sandbox_test/data'
 
 
 dag_args = {
     'owner':'daniel.lee',
     'depends_on_past': False,
-    'start_date': datetime(2016, 1, 1),
-    'end_date' : datetime(2016, 1, 10),
-    'retry_delay': timedelta(minutes=3)
-    # 'template_searchpath': 'Users/dhyungseoklee/Projects/airflow/helpers/sql'
-    # 'template_searchpath' : '/airflow/helpers/sql'
+    'start_date': datetime(2016, 1, 3),
+    'end_date' : datetime(2016, 1, 6),
+    'retry_delay': timedelta(minutes=3),
 }
 
 dag = DAG(
     dag_id = 'stack_overflow_tags',
     default_args = dag_args,
-    template_searchpath = ['/Users/dhyungseoklee/Projects/airflow/helpers/sql'],
-    schedule_interval = '@hourly'
+    template_searchpath = ['/Users/dhyungseoklee/Projects/airflow/helpers/sql/stack_overflow'],
+    catchup = False,
+    schedule_interval = '@daily'  
 )       
 
 
@@ -49,7 +44,8 @@ t2 = BigQueryOperator(
     time_partitioning = {
         'type':'DAY'
     },
-    destination_dataset_table = f"{project_id}:{dataset_id}.{tags_data_table_id}",
+    # destination_dataset_table = f"{project_id}:{dataset_id}.{tags_data_table_id}${{ ds_nodash }}",
+    destination_dataset_table = 'airflow-sandbox-296122:airflow.stack_overflow_tags_{{ ds_nodash }}',
     dag = dag
 )
 
@@ -57,9 +53,10 @@ t2 = BigQueryOperator(
 
 t3 = BigQueryToCloudStorageOperator(
     task_id = 'export_csv_to_gcs',
-    source_project_dataset_table = f"{project_id}:{dataset_id}.{tags_data_table_id}",
-    destination_cloud_storage_uris = [cloud_storage_uri],
-    export_format = 'csv',
+    # source_project_dataset_table = f"{project_id}:{dataset_id}.{tags_data_table_id}",
+    source_project_dataset_table = 'airflow-sandbox-296122:airflow.stack_overflow_tags_{{ ds_nodash }}',
+    destination_cloud_storage_uris = ['gs://airflow_sandbox_test/stack_overflow_data/data_{{ ds_nodash }}'],
+    export_format = 'CSV',
     dag = dag
 )
 
