@@ -5,12 +5,14 @@ from airflow import DAG
 from airflow.operators.dummy_operator import DummyOperator
 from airflow.contrib.operators.bigquery_operator import BigQueryOperator
 from airflow.contrib.operators.bigquery_to_gcs import BigQueryToCloudStorageOperator
+from airflow.contrib.sensors.gcs_sensor import GoogleCloudStorageObjectSensor
+from airflow.contrib.sensors.bigquery_sensor import BigQueryTableSensor
 
 dag_args = {
     'owner':'daniel.lee',
     'depends_on_past': False,
-    # 'start_date': datetime(2016, 1, 3),
-    # 'end_date' : datetime(2016, 1, 6),
+    'start_date': datetime(2016, 1, 3),
+    'end_date' : datetime(2016, 1, 6),
     'retry_delay': timedelta(minutes=3),
 }
 
@@ -22,11 +24,15 @@ dag = DAG(
     schedule_interval = '@daily'
 )
 
-dummy_opreator = DummyOperator(
+# add loop to loop through the tasks
+
+
+task_starter = DummyOperator(
     task_id = 'task_starter',
     dag = dag
 )
 
+# create tables in bigquery
 posts_data_task = BigQueryOperator(
     task_id = 'create_posts_data_table',
     bigquery_conn_id = 'bigquery_default',
@@ -73,12 +79,71 @@ users_data_task = BigQueryOperator(
 )
 
 
-export_to_gcs = BigQueryToCloudStorageOperator(
-    task_id = 'export_csv_to_gcs',
+# put sensors here until all backfill is complete?
+posts_sensor = BigQueryTableSensor(
+    task_id = 'posts_sensor',
+    project_id = 'airflow-sandbox-296122',
+    dataset_id = 'airflow',
+    table_id = 'so_posts_data_{{ ds_nodash }}',
+    bigquery_conn_id = 'bigquery_default',
+    dag = dag
+)
+
+users_sensor = BigQueryTableSensor(
+    task_id = 'user_sensor',
+    project_id = 'airflow-sandbox-296122',
+    dataset_id = 'airflow',
+    table_id = 'so_users_data_{{ ds_nodash }}',
+    bigquery_conn_id = 'bigquery_default'
+)
+
+tags_sensor = BigQueryTableSensor(
+    task_id = 'tags_sensor',
+    project_id = 'airflow-sandbox-296122',  
+    dataset_id = 'airflow',
+    table_id = 'so_tags_data_{{ ds_nodash }}',
+    bigquery_conn_id = 'bigquery_default'
+)
+
+
+
+# export bigquery tables to gcs
+export_posts_to_gcs = BigQueryToCloudStorageOperator(
+    task_id = 'export_posts_to_gcs',
     # source_project_dataset_table = f"{project_id}:{dataset_id}.{tags_data_table_id}",
-    source_project_dataset_table = 'airflow-sandbox-296122:airflow. {{ ds_nodash }}',
-    destination_cloud_storage_uris = ['gs://airflow_sandbox_test/so_to_postgres/data_{{ ds_nodash }}'],
+    source_project_dataset_table = 'airflow-sandbox-296122:airflow.so_posts_data_{{ ds_nodash }}',    
+    destination_cloud_storage_uris = ['gs://airflow_sandbox_test/so_to_postgres/posts_data/data_{{ ds_nodash }}'],
     export_format = 'CSV',
+    dag = dag
+)
+
+
+export_tags_to_gcs = BigQueryToCloudStorageOperator(
+    task_id = 'export_tags_to_gcs',
+    # source_project_dataset_table = f"{project_id}:{dataset_id}.{tags_data_table_id}",
+    source_project_dataset_table = 'airflow-sandbox-296122:airflow.so_tags_data_{{ ds_nodash }}',
+    destination_cloud_storage_uris = ['gs://airflow_sandbox_test/so_to_postgres/tags_data/data_{{ ds_nodash }}'],
+    export_format = 'CSV',
+    dag = dag
+)
+
+export_users_to_gcs = BigQueryToCloudStorageOperator(
+    task_id = 'export_users_to_gcs',
+    # source_project_dataset_table = f"{project_id}:{dataset_id}.{tags_data_table_id}",
+    source_project_dataset_table = 'airflow-sandbox-296122:airflow.so_users_data_*',
+    destination_cloud_storage_uris = ['gs://airflow_sandbox_test/so_to_postgres/users_data/data{{ ds_nodash }}'],
+    export_format = 'CSV',
+    dag = dag
+)
+
+
+
+# put gcs sensors here
+posts_gcs_sensor = GoogleCloudStorageObjectSensor(
+    task_id = 'posts_gcs_sensor',
+    bucket = 'gs://airflow_sandbox_test/so_to_postgres/posts_data',
+    object = 'data_{{ ds_nodash }}',
+    gcp_conn_id = 'google_cloud_default',
     dag = dag
 )
 
@@ -86,10 +151,7 @@ export_to_gcs = BigQueryToCloudStorageOperator(
 
 
 
-
-
-
-dummy_operator >> posts_data_task
-dummy_operator >> tags_data_task
-dummy_operator >> users_data_task
+task_starter >> posts_data_task >> posts_sensor >> export_posts_to_gcs >> posts_gcs_sensor
+# task_starter >> tags_data_task >> tags_sensor >> export_tags_to_gcs 
+# task_starter >> users_data_task >> users_sensor >> export_users_to_gcs
 
