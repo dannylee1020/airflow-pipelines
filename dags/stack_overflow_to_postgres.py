@@ -49,7 +49,7 @@ posts_data_task = BigQueryOperator(
 )
 
 tags_data_task = BigQueryOperator(
-    task_id = 'create_posts_data_table',
+    task_id = 'create_tags_data_table',
     bigquery_conn_id = 'bigquery_default',
     sql = 'tags_data.sql',
     create_disposition = 'CREATE_IF_NEEDED',
@@ -64,7 +64,7 @@ tags_data_task = BigQueryOperator(
 )
 
 users_data_task = BigQueryOperator(
-    task_id = 'create_posts_data_table',
+    task_id = 'create_users_data_table',
     bigquery_conn_id = 'bigquery_default',
     sql = 'users_data.sql',
     create_disposition = 'CREATE_IF_NEEDED',
@@ -112,7 +112,8 @@ export_posts_to_gcs = BigQueryToCloudStorageOperator(
     task_id = 'export_posts_to_gcs',
     # source_project_dataset_table = f"{project_id}:{dataset_id}.{tags_data_table_id}",
     source_project_dataset_table = 'airflow-sandbox-296122:airflow.so_posts_data_{{ ds_nodash }}',    
-    destination_cloud_storage_uris = ['gs://airflow_sandbox_test/so_to_postgres/posts_data/data_{{ ds_nodash }}'],
+    destination_cloud_storage_uris = ['gs://airflow_sandbox_test/so_to_postgres/posts/data_{{ ds_nodash }}'],
+    print_header = False,
     export_format = 'CSV',
     dag = dag
 )
@@ -122,7 +123,7 @@ export_tags_to_gcs = BigQueryToCloudStorageOperator(
     task_id = 'export_tags_to_gcs',
     # source_project_dataset_table = f"{project_id}:{dataset_id}.{tags_data_table_id}",
     source_project_dataset_table = 'airflow-sandbox-296122:airflow.so_tags_data_{{ ds_nodash }}',
-    destination_cloud_storage_uris = ['gs://airflow_sandbox_test/so_to_postgres/tags_data/data_{{ ds_nodash }}'],
+    destination_cloud_storage_uris = ['gs://airflow_sandbox_test/so_to_postgres/tags/data_{{ ds_nodash }}'],
     export_format = 'CSV',
     dag = dag
 )
@@ -141,7 +142,7 @@ export_users_to_gcs = BigQueryToCloudStorageOperator(
 # put gcs sensors here
 posts_gcs_sensor = GoogleCloudStorageObjectSensor(
     task_id = 'posts_gcs_sensor',
-    bucket = 'gs://airflow_sandbox_test/so_to_postgres/posts_data',
+    bucket = 'gs://airflow_sandbox_test/so_to_postgres/posts',
     object = 'data_{{ ds_nodash }}',
     gcp_conn_id = 'google_cloud_default',
     dag = dag
