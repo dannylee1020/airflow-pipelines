@@ -4,3 +4,5 @@ logs
 *.json
 .env
 *.pyc
+*.csv
+*.DS_Store
