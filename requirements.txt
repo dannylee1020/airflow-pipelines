@@ -1,4 +1,5 @@
 apache-airflow==1.10.13
 apache-airflow-backport-providers-google
+gsutil
 python-decouple
 psycopg2==2.8.6    
