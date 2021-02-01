@@ -26,9 +26,6 @@ def download_blob(bucket_name, prefix):
             destination = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', 'data', 'answers_data', file_name))
         file.download_to_filename(destination)
 
-    # print(f"{source_file} downloaded to: {destination}")
-
-
 
 if __name__ == '__main__':
     download_blob(bucket_name, posts_prefix)
@@ -54,7 +51,6 @@ if __name__ == '__main__':
                         # cmd = "COPY posts_answers FROM STDIN WITH (FORMAT CSV)"
                         continue
                     curr.copy_expert(cmd, f)
-                    # conn.flush()
                     conn.commit()
                 else:
                     continue
