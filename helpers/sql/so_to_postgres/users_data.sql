@@ -1,7 +1,12 @@
-# getting users data from bigquery public data
+# create distinct user data for dimension modeling
 
-select
+```
+-> join posts and answers for date partitioning?
+```
+
+
+select distinct
     *
-from `bigquery-public-data.stackoverflow.users`
-where format_timestamp('%Y-%m-%d', creation_date) = "{{ ds }}" 
+from `airflow-sandbox-296122:airflow.so_users_table_*`
+
 
