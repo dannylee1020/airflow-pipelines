@@ -77,22 +77,6 @@ users_table_task = BigQueryOperator(
     dag = dag
 )
 
-# # create distinct user data
-# users_data_task = BigQueryOperator(
-#     task_id = 'create_users_data',
-#     bigquery_conn_id = 'bigquery_default',
-#     sql = 'users_data.sql',
-#     create_disposition = 'CREATE_IF_NEEDED',
-#     write_disposition = 'WRITE_TRUNCATE',
-#     user_legacy_sql = False,
-#     time_partitioning = {
-#         'type':'DAY'
-#     },
-#     destination_dataset_table = 'airflow-sandbox-296122:airflow.so_users_data_{{ ds_nodash }}',
-#     dag = dag
-# )
-
-
 
 # export bigquery tables to gcs
 export_posts_to_gcs = BigQueryToCloudStorageOperator(
@@ -133,37 +117,6 @@ export_users_to_gcs = BigQueryToCloudStorageOperator(
 #     bash_command = 'python ${AIRFLOW_HOME}/helpers/scripts/load_data_to_postgres.py',
 #     dag = dag
 # )
-
-
-
-
-# # put gcs sensors here
-# # gcs sensor not working?
-
-# posts_gcs_sensor = GoogleCloudStorageObjectSensor(
-#     task_id = 'posts_gcs_sensor',
-#     bucket = 'gs://airflow_sandbox_test/so_to_postgres/posts',
-#     object = 'data_{{ ds_nodash }}',
-#     gcp_conn_id = 'google_cloud_default',
-#     dag = dag
-# )
-
-# users_gcs_sensor = GoogleCloudStorageObjectSensor(
-#     task_id = 'posts_gcs_sensor',
-#     bucket = 'gs://airflow_sandbox_test/so_to_postgres/users',
-#     object = 'data_{{ ds_nodash }}',
-#     gcp_conn_id = 'google_cloud_default',
-#     dag = dag
-# )
-
-# answers_gcs_sensor = GoogleCloudStorageObjectSensor(
-#     task_id = 'posts_gcs_sensor',
-#     bucket = 'gs://airflow_sandbox_test/so_to_postgres/answers',
-#     object = 'data_{{ ds_nodash }}',
-#     gcp_conn_id = 'google_cloud_default',
-#     dag = dag
-# )
-
 
 
 
