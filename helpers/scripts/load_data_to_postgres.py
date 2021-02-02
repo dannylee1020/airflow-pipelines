@@ -37,19 +37,21 @@ if __name__ == '__main__':
     curr = conn.cursor()
 
     file_path = '/Users/dhyungseoklee/Projects/airflow/data'
-    for dir in sorted(os.listdir(file_path), reverse = True):
-        if not dir.startswith('.'):
-            for file in os.listdir(file_path + '/' + dir):
+    dir_name = ['users_data', 'answers_data', 'posts_data']
+    for name in dir_name:
+        for file in os.listdir(file_path + '/' + name):
+    # # for dir in sorted(os.listdir(file_path), reverse = True):
+            if not file.startswith('.'):
+                # for file in os.listdir(file_path + '/' + dir):
                 if file.startswith('data'):
-                    f = open(os.path.join(os.path.join(file_path, dir), file), encoding = 'utf-8') 
+                    f = open(os.path.join(os.path.join(file_path, name), file), encoding = 'utf-8') 
                     # bulk loading data 
-                    if dir.startswith('users'):
+                    if name.startswith('users'):
                         cmd = "COPY users FROM STDIN WITH (FORMAT CSV)"
-                    elif dir.startswith('posts'):
+                    elif name.startswith('posts'):
                         cmd = "COPY posts FROM STDIN WITH (FORMAT CSV)"
                     else:
-                        # cmd = "COPY posts_answers FROM STDIN WITH (FORMAT CSV)"
-                        continue
+                        cmd = "COPY posts_answers FROM STDIN WITH (FORMAT CSV)"
                     curr.copy_expert(cmd, f)
                     conn.commit()
                 else:
