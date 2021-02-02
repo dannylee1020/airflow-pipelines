@@ -43,6 +43,8 @@ class Users(Base):
     website_url = Column('website_url', Text())
     # one to many with posts
     owner_posts = relationship('Posts', back_populates = 'owner_user', foreign_keys = [id])
+    # one to many with post_answers
+    owner_posts_answer = relationship('Post_answers', back_populates = 'owner_user_answers', foreign_keys = [id]) 
 
 class Posts(Base):
     __tablename__ = 'posts'
@@ -50,7 +52,7 @@ class Posts(Base):
     id = Column(Integer, primary_key = True)
     title = Column('title', Text())
     body = Column('body', Text())
-    accepted_answer_id = Column('accepted_answer', Integer)
+    accepted_answer_id = Column('accepted_answer_id', Integer, ForeignKey('posts_answers.id'))
     answer_count = Column('answer_count', Integer)
     comment_count = Column('comment_count', Integer)
     community_owned_date = Column('community_owned_date', DateTime)
@@ -65,43 +67,34 @@ class Posts(Base):
     view_count = Column('view_count', Integer)
     # many to one relationship
     owner_user = relationship('Users', back_populates = 'owner_posts', foreign_keys = [owner_user_id])
+    # one to one with post_answers
+    answer = relationship('Post_answers', uselist = False, back_populates = 'post_answers', foreign_keys = [accepted_answer_id])
 
 
 
-# class Post_answers(Base):
-#     __tablename__ = 'posts_answers'
+class Post_answers(Base):
+    __tablename__ = 'posts_answers'
 
-#     id = Column(Integer, ForeignKey('posts.id'), primary_key = True)
-#     title = Column('title', Text())
-#     body = Column('body', Text())
-#     accepted_answer_id = Column('accepted_answer', Integer)
-#     answer_count = Column('answer_count', Integer)
-#     comment_count = Column('comment_count', Integer)
-#     community_owned_date = Column('community_owned_date', DateTime)
-#     creation_date = Column('creation_date', DateTime)
-#     favorite_count = Column('favorite_count', Integer)
-#     last_activity_date = Column('last_activity_date', DateTime)
-#     last_edit_date = Column('last_edit_date', DateTime)
-#     last_editor_display_name = Column('last_editor_display_name', Text())
-#     last_editor_user_id = Column('last_editor_user_id', Integer, ForeignKey('users.id'))
-#     owner_display_name = Column('owner_display_name', Text())
-#     owner_user_id = Column('ownder_user_id', Integer, ForeignKey('users.id'))
-#     parent_id = Column('parent_id', Integer)
-#     post_type_id = Column('post_type_id', Integer)
-#     score = Column('score', Integer)
-#     tags = Column('tags', Text())
-#     view_count = Column('view_count', Integer)
-#     # # one to one with post
-#     # post_answers = relationship('Posts', back_populates = 'answer')
-#     # # many to one with user
-#     # owner_user_answers = relationship('User', back_populates = 'owner_posts_answer')
-#     # editor_user_answers = relationship('User', back_populates = 'editor_posts_answer')
-
-#     # one to one with post
-#     post_answers = relationship('Posts', back_populates = 'answer', foreign_keys = [id])
-#     # many to one with user
-#     owner_user_answers = relationship('Users', back_populates = 'owner_posts_answer', foreign_keys = [owner_user_id])
-#     editor_user_answers = relationship('Users', back_populates = 'editor_posts_answer', foreign_keys = [last_editor_user_id])
+    id = Column(Integer, primary_key = True)
+    title = Column('title', Text())
+    body = Column('body', Text())
+    accepted_answer_id = Column('accepted_answer_id', Integer)
+    answer_count = Column('answer_count', Integer)
+    comment_count = Column('comment_count', Integer)
+    community_owned_date = Column('community_owned_date', DateTime)
+    creation_date = Column('creation_date', DateTime)
+    favorite_count = Column('favorite_count', Integer)
+    owner_display_name = Column('owner_display_name', Text())
+    owner_user_id = Column('owner_user_id', Integer, ForeignKey('users.id'))
+    parent_id = Column('parent_id', Integer)
+    post_type_id = Column('post_type_id', Integer)
+    score = Column('score', Integer)
+    tags = Column('tags', Text())
+    view_count = Column('view_count', Integer)
+    # one to one with post
+    post_answers = relationship('Posts', back_populates = 'answer', foreign_keys = [id])
+    # many to one with user
+    owner_user_answers = relationship('Users', back_populates = 'owner_posts_answer', foreign_keys = [owner_user_id])
 
 
 
