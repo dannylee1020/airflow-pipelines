@@ -1,6 +1,7 @@
 import airflow
 from datetime import timedelta, datetime
 from airflow import DAG
+from airflow.utils.helpers import cross_downstream, chain
 
 from airflow.operators.dummy_operator import DummyOperator
 from airflow.contrib.operators.bigquery_operator import BigQueryOperator
@@ -50,7 +51,7 @@ posts_data_task = BigQueryOperator(
 )
 
 answers_data_task = BigQueryOperator(
-    task_id = 'create_tags_data_table',
+    task_id = 'create_answers_data_table',
     bigquery_conn_id = 'bigquery_default',
     sql = 'answers_data.sql',
     create_disposition = 'CREATE_IF_NEEDED',
@@ -91,7 +92,7 @@ export_posts_to_gcs = BigQueryToCloudStorageOperator(
 
 
 export_answers_to_gcs = BigQueryToCloudStorageOperator(
-    task_id = 'export_tags_to_gcs',
+    task_id = 'export_answers_to_gcs',
     # source_project_dataset_table = f"{project_id}:{dataset_id}.{tags_data_table_id}",
     source_project_dataset_table = 'airflow-sandbox-296122:airflow.so_answers_data_{{ ds_nodash }}',
     destination_cloud_storage_uris = ['gs://airflow_sandbox_test/so_to_postgres/post_answers/data_{{ ds_nodash }}'],
@@ -109,18 +110,12 @@ export_users_to_gcs = BigQueryToCloudStorageOperator(
     export_format = 'CSV',
     dag = dag
 )
+# execute python script
+load_data_to_db = BashOperator(
+    task_id = 'load_data_to_db',
+    bash_command = 'python ${AIRFLOW_HOME}/helpers/scripts/load_data_to_postgres.py',
+    dag = dag
+)
 
 
-# # execute python script
-# load_data_to_db = BashOperator(
-#     task_id = 'load_data_to_db',
-#     bash_command = 'python ${AIRFLOW_HOME}/helpers/scripts/load_data_to_postgres.py',
-#     dag = dag
-# )
-
-
-
-task_starter >> posts_data_task >> export_posts_to_gcs 
-task_starter >> answers_data_task >> export_answers_to_gcs 
-task_starter >> users_table_task >> export_users_to_gcs 
-
+chain(task_starter, [posts_data_task, answers_data_task, users_table_task], [export_posts_to_gcs, export_answers_to_gcs, export_users_to_gcs], load_data_to_db)
