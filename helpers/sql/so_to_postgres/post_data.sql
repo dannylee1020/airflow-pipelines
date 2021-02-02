@@ -19,12 +19,15 @@ select
     view_count
 from `bigquery-public-data.stackoverflow.stackoverflow_posts`
 where format_timestamp('%Y-%m-%d', creation_date) = "{{ ds }}" 
-and owner_user_id not in (
-    select distinct 
-        p.owner_user_id,
-    from `airflow-sandbox-296122.airflow.so_users_table_*` u 
-    right join  `airflow-sandbox-296122.airflow.so_posts_data_*` p 
-    on u.id = p.owner_user_id
-    where u.id is null and p.owner_user_id is not null
+and owner_user_id in (
+    select distinct
+        id
+    from `bigquery-public-data.stackoverflow.users`
+    where format_timestamp('%Y-%m-%d', creation_date) = "{{ ds }}" 
 )
-
+and accepted_answer_id in (
+    select distinct
+        id
+    from `bigquery-public-data.stackoverflow.posts_answers`
+    where format_timestamp('%Y-%m-%d', creation_date) = "{{ ds }}" 
+)
