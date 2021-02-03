@@ -30,4 +30,9 @@ and accepted_answer_id in (
         id
     from `bigquery-public-data.stackoverflow.posts_answers`
     where format_timestamp('%Y-%m-%d', creation_date) = "{{ ds }}" 
+    and owner_user_id in (
+    select distinct
+        id
+    from `bigquery-public-data.stackoverflow.users`
+    where format_timestamp('%Y-%m-%d', creation_date) = "{{ ds }}")
 )
