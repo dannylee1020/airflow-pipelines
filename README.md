@@ -1,3 +1,3 @@
 # Data Pipelines with Airflow
-## About
-This is a practice project for running airflow DAGs to automate ETL data pipelines, tasks and workflows. 
+## Overview
+This is a practice project for running airflow to automate ETL jobs, data pipelines and integrating other tools such as dbt to the analytics workflow.
