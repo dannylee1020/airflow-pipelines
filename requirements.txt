@@ -3,3 +3,4 @@ apache-airflow-backport-providers-google
 gsutil
 python-decouple
 psycopg2==2.8.6    
+docker==20.10.2
