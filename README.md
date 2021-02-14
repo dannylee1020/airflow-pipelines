@@ -13,7 +13,7 @@ I chose the 2nd aprroach and came up with another approach.
 
 ### Using BashOperator
 `BashOperator` in airflow simply executes a shell command. Because the primary dbt interface is with command line, it is pretty useful to run different dbt tasks once you have the dbt models ready. 
-<br>
+
 This approach, however, is not very good for scaling. If the number of dbt models increase, it would be very difficult to manage and debug. 
 
 
