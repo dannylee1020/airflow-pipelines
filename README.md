@@ -14,11 +14,11 @@ I chose the 2nd aprroach and came up with another approach.
 ### Using BashOperator
 `BashOperator` in airflow simply executes a shell command. Because the primary dbt interface is with command line, it is pretty useful to run different dbt tasks once you have the dbt models ready. 
 
-This approach, however, is not very good for scaling. If the number of dbt models increase, it would be very difficult to manage and debug. 
+This approach, however, is not very good at scaling. If the number of dbt models increase, it would be very difficult to manage and debug. 
 
 
 ### Using Docker 
-Another approach is to containerize dbt projects and use `DockerOperator` to run the dbt inside the docker container. When scale grows, multiple docker containers can be managed by Kubernetes. 
+Another approach is to containerize dbt projects and use `DockerOperator` to run the dbt inside the docker container. When the scale grows to multiple containers, they can be managed by Kubernetes.
 
 
 ## Reference
