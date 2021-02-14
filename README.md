@@ -23,4 +23,5 @@ Another approach is to containerize dbt projects and use `DockerOperator` to run
 
 ## Reference
 [Running dbt in production](https://docs.getdbt.com/docs/running-a-dbt-project/running-dbt-in-production/)
+<br>
 [Creating a Docker image for a dbt project](https://github.com/dannylee1020/dbt-docker)
