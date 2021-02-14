@@ -4,6 +4,7 @@ from airflow import DAG
 
 from airflow.contrib.operators.bigquery_operator import BigQueryOperator
 from airflow.operators.bash_operator import BashOperator
+from airflow.operators.docker_operator import DockerOperator
 
 dag_args = {    
     'owner':'daniel.lee',
@@ -34,26 +35,36 @@ with DAG(
         destination_dataset_table = 'airflow-sandbox-296122:airflow_dbt.games_post_wide'
     ) 
 
-
-    t2 = BashOperator(
-        task_id = 'dbt_docs',
-        bash_command = 'cd /Users/dhyungseoklee/Projects/dbt/baseball_dbt && dbt docs generate'
+# running dbt with Docker container
+    t2 = DockerOperator(
+        task_id = 'run_docker_dbt',
+        image = 'dannylee1020/baseball_dbt',
+        docker_url = 'unix://var/run/docker.sock',  
+        volumes = ['/Users/dhyungseoklee/.config/gcloud:/root/.config/gcloud'],
+        api_version = 'auto'
     )
 
-    t3 = BashOperator(
-        task_id = 'dbt_test',
-        bash_command = 'cd /Users/dhyungseoklee/Projects/dbt/baseball_dbt && dbt test'
-    )
+# running dbt with BashOperator
+    # t2 = BashOperator(
+    #     task_id = 'dbt_docs',
+    #     bash_command = 'cd /Users/dhyungseoklee/Projects/dbt/baseball_dbt && dbt docs generate'
+    # )
 
-    t4 = BashOperator(
-        task_id = 'dbt_run',
-        bash_command = 'cd /Users/dhyungseoklee/Projects/dbt/baseball_dbt && dbt run'
-    )
+    # t3 = BashOperator(
+    #     task_id = 'dbt_test',
+    #     bash_command = 'cd /Users/dhyungseoklee/Projects/dbt/baseball_dbt && dbt test'
+    # )
+
+    # t4 = BashOperator(
+    #     task_id = 'dbt_run',
+    #     bash_command = 'cd /Users/dhyungseoklee/Projects/dbt/baseball_dbt && dbt run'
+    # )
 
 
 
 
-t1 >> t2 >> t3 >> t4
+# t1 >> t2 >> t3 >> t4
+t1 >> t2
 
 
 
